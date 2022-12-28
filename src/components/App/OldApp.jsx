@@ -65,7 +65,6 @@ export class App extends Component {
 
     this.setState({ loading: true });
     const res = await getImagesApi(value, page);
-    toast.success(`We found ${res.totalHits} images and photos`)
     console.log(res);
     this.setState({ loading: false });
 
@@ -137,11 +136,13 @@ export class App extends Component {
           </Modal>
         )}
         
-        <ScrollToTop showUnder={160} topPosition={0}> {/* https://www.npmjs.com/package/react-scroll-up/v/1.4.0 */}      
-          <FiArrowUpCircle style={{ width: 50, height: 50, color: "#3f51b5" }} />           
+        <ScrollToTop showUnder={160}>
+       
+          <FiArrowUpCircle style={{ width: 50, height: 50, color: "#3f51b5" }} /> 
+          
         </ScrollToTop>  
         
-        <ToastContainer autoClose={2000} position="top-left" theme="dark" />
+        <ToastContainer autoClose={2000} position="top-center" theme="light" />
       </Container>
     )
   }
