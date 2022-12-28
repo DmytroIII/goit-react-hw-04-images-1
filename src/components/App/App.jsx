@@ -136,7 +136,7 @@ export class App extends Component {
           </Modal>
         )}
         
-        <ScrollToTop showUnder={160} topPosition={0}> {/* https://www.npmjs.com/package/react-scroll-up/v/1.4.0 */}       
+        <ScrollToTop showUnder={350} topPosition={0}> {/* https://www.npmjs.com/package/react-scroll-up/v/1.4.0 */}       
           <FiArrowUpCircle style={{ width: 50, height: 50, color: "#3f51b5" }} />           
         </ScrollToTop>  
         
