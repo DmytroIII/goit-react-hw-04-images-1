@@ -1,6 +1,6 @@
 import { ImageGallery } from "components/ImageGallery/ImageGallery";
 import { Searchbar } from "components/Searchbar/Searchbar";
-import { Component } from "react";
+import React, { Component } from "react";
 import { getImagesApi } from '../../services/ApiService'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -8,8 +8,8 @@ import Loader from "components/Loader/Loader";
 import Button from "components/Button/Button";
 import Container from './App.styled';
 import Modal from "components/Modal/Modal";
-
-
+import {FiArrowUpCircle} from "react-icons/fi"
+import ScrollToTop from 'react-scroll-up';
 
 export class App extends Component {
   state = {
@@ -117,8 +117,8 @@ export class App extends Component {
     const checkGalleryImg = images.length !== 0;
     
 
-    return (
-      <Container>
+    return (      
+      <Container>        
         <Searchbar onSubmit={this.onSubmit} />
         {checkGalleryImg && <ImageGallery
               images={images}
@@ -135,6 +135,13 @@ export class App extends Component {
             <img src={selectedImg} alt={modalImgAlt} />
           </Modal>
         )}
+        
+        <ScrollToTop showUnder={160}>
+       
+          <FiArrowUpCircle style={{ width: 50, height: 50, color: "#3f51b5" }} /> 
+          
+        </ScrollToTop>  
+        
         <ToastContainer autoClose={2000} position="top-center" theme="light" />
       </Container>
     )
