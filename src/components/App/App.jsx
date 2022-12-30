@@ -39,6 +39,7 @@ export function App() {
             'Sorry, there are no images matching your search query. Please try again.'
           );
           setImages([]);
+          setLoading(false);
           return;
         }
         setLoading(false);
