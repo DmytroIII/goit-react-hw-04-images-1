@@ -1,6 +1,6 @@
 import { ImageGallery } from "components/ImageGallery/ImageGallery";
-import { Searchbar } from "components/Searchbar/Searchbar";
-import React, { Component } from "react";
+import Searchbar from "components/Searchbar/Searchbar";
+import React, { useState, useEffect } from "react";
 import { getImagesApi } from '../../services/ApiService'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -11,89 +11,93 @@ import Modal from "components/Modal/Modal";
 import {FiArrowUpCircle} from "react-icons/fi"
 import ScrollToTop from 'react-scroll-up';
 
-export class App extends Component {
-  state = {
-    images: [],
-    query: null,
-    page: 1,  
-    totalPages: null,
-    loading: false,
-    selectedImg: null,
-    modalImgAlt: '',
-  };
+export function App() {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [selectedImg, setSelectedImg] = useState(null);
+  const [modalImgAlt, setModalImgAlt] = useState('');
 
-  async componentDidUpdate(_, prevState) {
-    const { query, page, totalPages, images } = this.state;
-
-    // console.log('prevState.page: ', prevState.page);
-    // console.log('this.state.page: ', this.state.page);
-
-    // console.log('prevState.query: ', prevState.query);
-    // console.log('this.state.query: ', this.state.query);         
-
-    if (prevState.page !== page && page !== 1) {
-      this.setState({ loading: true });
-      const res = await getImagesApi(query, page);
-      console.log(res);
-
-      this.setState(({ images }) => ({
-        images: [...images, ...res.hits],
-        loading: false,
-      }));
-
-      setTimeout(() => this.scroll(), 1);
+  useEffect(() => {
+    if (!query) {
+      return;
     }
 
-    if (page >= totalPages && images !== prevState.images && images.length !== 0 ) {
-      toast.warning(
-        "We're sorry, but you've reached the end of search results."
-      );
+    const fetchApi = async () => {  
+      
+      if (page === 1) {
+        setLoading(true);
+        let res = await getImagesApi(query, page);
+        toast.success(`We found ${res.totalHits} images and photos`)
+        
+        setImages(images => [...res.hits]);
+        setTotalPages(Math.floor(res.totalHits / 12));
+        if (res.hits.length === 0) {
+          toast.success(
+            'Sorry, there are no images matching your search query. Please try again.'
+          );
+          setImages([]);
+          return;
+        }
+        setLoading(false);
+      }      
+  
+      if (page !== 1) {
+        setLoading(true);
+        const res = await getImagesApi(query, page);        
+        console.log(res);
+  
+        setImages(images => [...images, ...res.hits]);
+        setLoading(false);
+        };        
+  
+        if (page !== 1 ) {
+          scroll('bottom');
+        } else {
+          scroll('top');
+        }       
+    };
+    if (query && page) {
+      fetchApi();
     }
-  }
+  }, [page, query]);   
 
-  onSubmit = async evt => {
-    evt.preventDefault();
-    const input = evt.target.elements.search;
-    const value = input.value.trim();
-    const page = 1;
+  const customId = "custom-id-yes"; //Prevent duplicate toast.warning
 
-    if (value === '') {
+  useEffect(() => {
+  if (page >= totalPages  && images.length !== 0 ) {
+    toast.warning(
+      "We're sorry, but you've reached the end of search results.", {
+        toastId: customId
+      });
+  }}, [page, totalPages, images.length])
+
+
+
+  const onSubmit = newSearchQuery => {
+    if (!newSearchQuery.trim()) {
       toast.success('Please, enter another search value!');
-      this.setState({ images: [] });
+      setImages([]);
       return;
     }
 
-    this.setState({ loading: true });
-    const res = await getImagesApi(value, page);
-    toast.success(`We found ${res.totalHits} images and photos`)
-    console.log(res);
-    this.setState({ loading: false });
-
-    if (res.hits.length === 0) {
-      toast.success(
-        'Sorry, there are no images matching your search query. Please try again.'
-      );
-      this.setState({ images: [] });
+    if (newSearchQuery === query) {
+      toast.warn('You are already on the page of this collection.');
       return;
     }
-
-    const totalPages = Math.floor(res.totalHits / 12);
-
-    this.setState({
-      images: res.hits,
-      query: value,
-      page,
-      totalPages: totalPages,
-    });
+    setPage(1);
+    setImages([]);
+    setQuery(newSearchQuery);
   };  
 
-  loadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,      
-    }));
+  const loadMore = () => {
+    setPage(prevPage => prevPage + 1);
+    console.log(page);
   };
 
-  scroll = () => {
+  const scroll = () => {
     const { clientHeight } = document.documentElement;
     window.scrollBy({
       top: clientHeight - 180,
@@ -101,39 +105,35 @@ export class App extends Component {
     });
   }; 
 
-  selectImg = (largeImageURL, altTag) => {
-    this.setState({ selectedImg: largeImageURL, modalImgAlt: altTag });    
+  const selectImg = (largeImageURL, altTag) => {
+    setSelectedImg(largeImageURL);
+    setModalImgAlt(altTag);        
   };
 
-  closeModal = () => {
-    this.setState({
-      selectedImg: '',
-      modalImgAlt: '',
-    });
+  const closeModal = () => {
+    setSelectedImg('');
+    setModalImgAlt('');  
   };
-
-  render() {
-    const { images, loading, totalPages, page, selectedImg, modalImgAlt } = this.state;
+     
     const checkEndList = page < totalPages;
-    const checkGalleryImg = images.length !== 0;
-    
+    const checkGalleryImg = images.length !== 0;    
 
     return (      
       <Container>        
-        <Searchbar onSubmit={this.onSubmit} />
+        <Searchbar onFormSubmit={onSubmit} />
         {checkGalleryImg && <ImageGallery
               images={images}
-              onSelect={this.selectImg}
+              onSelect={selectImg}
         ></ImageGallery> } 
         {loading ? (
           <Loader />
         ) : (
-          checkGalleryImg && checkEndList && <Button onClick={this.loadMore} />
+          checkGalleryImg && checkEndList && <Button onClick={loadMore} />
         )}
 
         {selectedImg && (
-          <Modal onClose={this.closeModal}>
-            <img src={selectedImg} alt={modalImgAlt} />
+          <Modal onClose={closeModal} selectedImg={selectedImg} modalImgAlt={modalImgAlt} >
+            
           </Modal>
         )}
         
@@ -141,8 +141,7 @@ export class App extends Component {
           <FiArrowUpCircle style={{ width: 50, height: 50, color: "#3f51b5" }} />           
         </ScrollToTop>  
         
-        <ToastContainer autoClose={2000} position="top-left" theme="dark" />
+        <ToastContainer autoClose={2000} position="top-right" theme="dark" />
       </Container>
-    )
-  }
+    )  
 }
