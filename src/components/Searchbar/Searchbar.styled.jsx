@@ -14,8 +14,8 @@ export const SearchBarHeader = styled.header`
   padding-top: 12px;
   padding-bottom: 12px;
   color: #fff;
-  /* background-color: #3f51b5; */
-  background-color: rgb(22, 120, 180);
+  background-color: #3f51b5;
+  /* background-color: rgb(22, 120, 180); */
   box-shadow: 0px 3px 1px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.08), 0px 2px 2px rgba(0, 0, 0, 0.12);
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
